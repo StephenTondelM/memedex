@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/memepost")
@@ -34,7 +35,11 @@ public class MemePostController {
 
     @PostMapping({"/", ""})
     public ResponseEntity createPost(@RequestBody MemePost memePost) {
-        var memePostOptional = memePostRepository.findById(memePost.getId());
+        Optional<MemePost> memePostOptional = Optional.ofNullable(null);
+
+        if (memePost.getId() != null) {
+            memePostOptional = memePostRepository.findById(memePost.getId());
+        }
 
         if (memePostOptional.isEmpty()) {
             return ResponseEntity.ok(memePostRepository.save(memePost));
@@ -60,7 +65,7 @@ public class MemePostController {
         var memePostOptional = memePostRepository.findById(id);
 
         if (memePostOptional.isPresent()) {
-            memePost.setId(memePostOptional.get().getId());
+            memePost.setId(id);
 
             return ResponseEntity.ok(memePostRepository.save(memePost));
         } else {
