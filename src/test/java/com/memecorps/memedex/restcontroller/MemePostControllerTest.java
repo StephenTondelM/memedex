@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -57,7 +56,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void getAllValidRequestTest() throws Exception {
+    void getAllValidRequestWithAllFieldsTest() throws Exception {
         when(memePostRepositoryMock.findAll()).thenReturn(memePostFakeList);
 
         mockMvc.perform(get("/api/memepost"))
@@ -77,7 +76,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void getByIdValidRequestTest() throws Exception {
+    void getByIdValidRequestWithExistingResourceAndAllFieldsTest() throws Exception {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(memePostFakeList.get(0)));
 
         mockMvc.perform(get("/api/memepost/123"))
@@ -93,7 +92,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void getByIdInvalidRequestTest() throws Exception {
+    void getByIdInvalidRequestWithNonExistingResourceTest() throws Exception {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
 
         mockMvc.perform(get("/api/memepost/123"))
@@ -104,7 +103,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void createPostValidRequestTest() throws Exception {
+    void createPostValidRequestWithAllFieldsFilledTest() throws Exception {
         MemePost memePostFake = memePostFakeList.get(0);
 
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
@@ -127,7 +126,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void createPostInvalidRequestTest() throws Exception {
+    void createPostInvalidRequestWithExistingResourceTest() throws Exception {
         MemePost memePostFake = memePostFakeList.get(0);
 
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(memePostFake));
@@ -143,7 +142,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void deleteByIdValidRequestTest() throws Exception {
+    void deleteByIdValidRequestWithExistingResourceTest() throws Exception {
         MemePost memePostFake = memePostFakeList.get(0);
         
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(memePostFake));
@@ -158,7 +157,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void deleteByIdInvalidRequestTest() throws Exception {
+    void deleteByIdInvalidRequestWithNonExistingResourceTest() throws Exception {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
 
         mockMvc.perform(delete("/api/memepost/25"))
@@ -170,7 +169,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void updateByIdValidRequestTest() throws Exception {
+    void updateByIdValidRequestWithExistingResourceAndAllFieldsFilledTest() throws Exception {
         MemePost memePostFake = memePostFakeList.get(0);
         MemePost memePostFake2 = memePostFakeList.get(1);
 
@@ -194,7 +193,7 @@ class MemePostControllerTest {
     }
 
     @Test
-    void updateByIdInvalidRequestTest() throws Exception {
+    void updateByIdInvalidRequestWithNonExistingResourceTest() throws Exception {
         MemePost memePostFake = memePostFakeList.get(0);
 
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
