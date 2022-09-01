@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/memepost")
+@CrossOrigin
 public class MemePostController {
 
     @Autowired
