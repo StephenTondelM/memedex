@@ -28,13 +28,19 @@ public class MemePostController {
         if (memePostOptional.isPresent()) {
             return ResponseEntity.ok(memePostOptional.get());
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @PostMapping({"/", ""})
-    public MemePost createPost(@RequestBody MemePost memePost) {
-        return memePostRepository.save(memePost);
+    public ResponseEntity createPost(@RequestBody MemePost memePost) {
+        var memePostOptional = memePostRepository.findById(memePost.getId());
+
+        if (memePostOptional.isEmpty()) {
+            return ResponseEntity.ok(memePostRepository.save(memePost));
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
     }
 
     @DeleteMapping({"/{id}"})
@@ -45,7 +51,7 @@ public class MemePostController {
             memePostRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -54,9 +60,11 @@ public class MemePostController {
         var memePostOptional = memePostRepository.findById(id);
 
         if (memePostOptional.isPresent()) {
+            memePost.setId(memePostOptional.get().getId());
+
             return ResponseEntity.ok(memePostRepository.save(memePost));
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
