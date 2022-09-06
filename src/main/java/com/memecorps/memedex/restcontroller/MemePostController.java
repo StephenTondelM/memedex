@@ -43,6 +43,9 @@ public class MemePostController {
         }
 
         if (memePostOptional.isEmpty()) {
+            memePost.setId(null);
+            memePost.setTimestamp(System.currentTimeMillis());
+
             return ResponseEntity.ok(memePostRepository.save(memePost));
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
