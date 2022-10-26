@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,52 +42,67 @@ class MemePostControllerTest {
 
     List<MemePost> memePostFakeList;
 
+    Page<MemePost> memePostFakePages;
+
     @BeforeEach
     void beforeEach() {
         memePostFakeList = new ArrayList<>();
 
         memePostFakeList.add(MemePost.builder()
-                .id("123")
+                .id("1")
                 .user("testUser")
                 .memeUrl("memesareus.com")
                 .timestamp(1235123).build());
 
         memePostFakeList.add(MemePost.builder()
-                .id("1234")
+                .id("2")
                 .user("testUser2")
                 .memeUrl("memesareus.com")
                 .timestamp(1235127).build());
+
+        memePostFakePages = new PageImpl<>(memePostFakeList);
     }
 
     @Test
-    void getAllValidRequestWithAllFieldsTest() throws Exception {
-        when(memePostRepositoryMock.findAll()).thenReturn(memePostFakeList);
+    void getAllValidRequestWithAllFieldsAndDefaultPaginationAndDescOrderByTimeTest() throws Exception {
+        when(memePostRepositoryMock.findAll(any(Pageable.class))).thenReturn(memePostFakePages);
 
         mockMvc.perform(get("/api/memepost"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(("123")))
+                .andExpect(jsonPath("$[0].id").value(("1")))
                 .andExpect(jsonPath("$[0].user").value("testUser"))
                 .andExpect(jsonPath("$[0].memeUrl").value("memesareus.com"))
                 .andExpect(jsonPath("$[0].timestamp").value(1235123))
-                .andExpect(jsonPath("$[1].id").value(("1234")))
+                .andExpect(jsonPath("$[1].id").value(("2")))
                 .andExpect(jsonPath("$[1].user").value("testUser2"))
                 .andExpect(jsonPath("$[1].memeUrl").value("memesareus.com"))
                 .andExpect(jsonPath("$[1].timestamp").value(1235127));
 
-        verify(memePostRepositoryMock, times(1)).findAll();
+        verify(memePostRepositoryMock, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void getAllInvalidRequestWithInvalidPageTest() throws Exception {
+        when(memePostRepositoryMock.findAll(any(Pageable.class))).thenReturn(null);
+
+        mockMvc.perform(get("/api/memepost?page=3"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+
+        verify(memePostRepositoryMock, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
     void getByIdValidRequestWithExistingResourceAndAllFieldsTest() throws Exception {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(memePostFakeList.get(0)));
 
-        mockMvc.perform(get("/api/memepost/123"))
+        mockMvc.perform(get("/api/memepost/1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value("123"))
+                .andExpect(jsonPath("$.id").value("1"))
                 .andExpect(jsonPath("$.user").value("testUser"))
                 .andExpect(jsonPath("$.memeUrl").value("memesareus.com"))
                 .andExpect(jsonPath("$.timestamp").value(1235123));
@@ -96,7 +114,7 @@ class MemePostControllerTest {
     void getByIdInvalidRequestWithNonExistingResourceTest() throws Exception {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
 
-        mockMvc.perform(get("/api/memepost/123"))
+        mockMvc.perform(get("/api/memepost/12"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
@@ -172,7 +190,7 @@ class MemePostControllerTest {
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(memePostFake));
         doNothing().when(memePostRepositoryMock).deleteById(any(String.class));
 
-        mockMvc.perform(delete("/api/memepost/123"))
+        mockMvc.perform(delete("/api/memepost/1"))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
@@ -201,13 +219,13 @@ class MemePostControllerTest {
         when(memePostRepositoryMock.save(any(MemePost.class))).then(returnsFirstArg());
 
 
-        mockMvc.perform(put("/api/memepost/123")
+        mockMvc.perform(put("/api/memepost/1")
                         .content(asJsonString(memePostFake))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value("123"))
+                .andExpect(jsonPath("$.id").value("1"))
                 .andExpect(jsonPath("$.user").value("testUser"))
                 .andExpect(jsonPath("$.memeUrl").value("memesareus.com"))
                 .andExpect(jsonPath("$.timestamp").value(1235123));
@@ -222,7 +240,7 @@ class MemePostControllerTest {
 
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
 
-        mockMvc.perform(put("/api/memepost/123")
+        mockMvc.perform(put("/api/memepost/12")
                         .content(asJsonString(memePostFake))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

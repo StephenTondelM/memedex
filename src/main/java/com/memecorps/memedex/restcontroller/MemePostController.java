@@ -3,10 +3,15 @@ package com.memecorps.memedex.restcontroller;
 import com.memecorps.memedex.model.MemePost;
 import com.memecorps.memedex.repository.MemePostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,8 +24,19 @@ public class MemePostController {
     MemePostRepository memePostRepository;
 
     @GetMapping({"/", ""})
-    public List<MemePost> getAll() {
-        return memePostRepository.findAll();
+    public ResponseEntity getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        try {
+            List<MemePost> memePosts = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+
+            Page<MemePost> pageMemePosts = memePostRepository.findAll(paging);
+
+            memePosts = pageMemePosts.getContent();
+
+            return ResponseEntity.ok(memePosts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @GetMapping({"/{id}"})
