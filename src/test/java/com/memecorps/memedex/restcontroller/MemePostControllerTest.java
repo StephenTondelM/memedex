@@ -71,27 +71,41 @@ class MemePostControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(("1")))
-                .andExpect(jsonPath("$[0].user").value("testUser"))
-                .andExpect(jsonPath("$[0].memeUrl").value("memesareus.com"))
-                .andExpect(jsonPath("$[0].timestamp").value(1235123))
-                .andExpect(jsonPath("$[1].id").value(("2")))
-                .andExpect(jsonPath("$[1].user").value("testUser2"))
-                .andExpect(jsonPath("$[1].memeUrl").value("memesareus.com"))
-                .andExpect(jsonPath("$[1].timestamp").value(1235127));
+                .andExpect(jsonPath("$.content.[0].id").value(("1")))
+                .andExpect(jsonPath("$.content.[0].user").value("testUser"))
+                .andExpect(jsonPath("$.content.[0].memeUrl").value("memesareus.com"))
+                .andExpect(jsonPath("$.content.[0].timestamp").value(1235123))
+                .andExpect(jsonPath("$.content.[1].id").value(("2")))
+                .andExpect(jsonPath("$.content.[1].user").value("testUser2"))
+                .andExpect(jsonPath("$.content.[1].memeUrl").value("memesareus.com"))
+                .andExpect(jsonPath("$.content.[1].timestamp").value(1235127));
+
+        verify(memePostRepositoryMock, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void getAllValidRequestWithOutOfBoundPageTest() throws Exception {
+        Page<MemePost> dummyPages = new PageImpl<>(new ArrayList<>());
+        when(memePostRepositoryMock.findAll(any(Pageable.class))).thenReturn(dummyPages);
+
+        mockMvc.perform(get("/api/memepost?page=3"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty());
 
         verify(memePostRepositoryMock, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
     void getAllInvalidRequestWithInvalidPageTest() throws Exception {
-        when(memePostRepositoryMock.findAll(any(Pageable.class))).thenReturn(null);
+        Page<MemePost> dummyPages = new PageImpl<>(new ArrayList<>());
+        when(memePostRepositoryMock.findAll(any(Pageable.class))).thenReturn(dummyPages);
 
-        mockMvc.perform(get("/api/memepost?page=3"))
+        mockMvc.perform(get("/api/memepost?page=-1"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
 
-        verify(memePostRepositoryMock, times(1)).findAll(any(Pageable.class));
+        verify(memePostRepositoryMock, times(0)).findAll(any(Pageable.class));
     }
 
     @Test

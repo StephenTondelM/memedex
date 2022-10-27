@@ -26,14 +26,11 @@ public class MemePostController {
     @GetMapping({"/", ""})
     public ResponseEntity getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
         try {
-            List<MemePost> memePosts = new ArrayList<>();
             Pageable paging = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
 
             Page<MemePost> pageMemePosts = memePostRepository.findAll(paging);
 
-            memePosts = pageMemePosts.getContent();
-
-            return ResponseEntity.ok(memePosts);
+            return ResponseEntity.ok(pageMemePosts);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
