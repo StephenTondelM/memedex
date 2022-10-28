@@ -3,6 +3,7 @@ package com.memecorps.memedex.restcontroller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memecorps.memedex.model.MemePost;
 import com.memecorps.memedex.repository.MemePostRepository;
+import com.memecorps.memedex.socketcontroller.MemeSocketController;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class MemePostControllerTest {
 
     @MockBean
     MemePostRepository memePostRepositoryMock;
+
+    @MockBean
+    MemeSocketController memeSocketControllerMock;
 
     List<MemePost> memePostFakeList;
 
@@ -141,7 +145,7 @@ class MemePostControllerTest {
 
         when(memePostRepositoryMock.findById(any(String.class))).thenReturn(Optional.ofNullable(null));
         when(memePostRepositoryMock.save(any(MemePost.class))).then(returnsFirstArg());
-
+        doNothing().when(memeSocketControllerMock).sendNewMeme(any(MemePost.class));
 
         mockMvc.perform(post("/api/memepost")
                         .content(asJsonString(memePostFake))
@@ -156,6 +160,7 @@ class MemePostControllerTest {
 
         verify(memePostRepositoryMock, times(1)).findById(any(String.class));
         verify(memePostRepositoryMock, times(1)).save(any(MemePost.class));
+        verify(memeSocketControllerMock, times(1)).sendNewMeme(any(MemePost.class));
     }
 
     @Test
@@ -164,7 +169,7 @@ class MemePostControllerTest {
         memePostFake.setId(null);
 
         when(memePostRepositoryMock.save(any(MemePost.class))).then(returnsFirstArg());
-
+        doNothing().when(memeSocketControllerMock).sendNewMeme(any(MemePost.class));
 
         mockMvc.perform(post("/api/memepost")
                         .content(asJsonString(memePostFake))
@@ -179,6 +184,7 @@ class MemePostControllerTest {
 
         verify(memePostRepositoryMock, times(0)).findById(any());
         verify(memePostRepositoryMock, times(1)).save(any(MemePost.class));
+        verify(memeSocketControllerMock, times(1)).sendNewMeme(any(MemePost.class));
     }
 
     @Test
@@ -195,6 +201,7 @@ class MemePostControllerTest {
 
         verify(memePostRepositoryMock, times(1)).findById(any(String.class));
         verify(memePostRepositoryMock, times(0)).save(any(MemePost.class));
+        verify(memeSocketControllerMock, times(0)).sendNewMeme(any(MemePost.class));
     }
 
     @Test

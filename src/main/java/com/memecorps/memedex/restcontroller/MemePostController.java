@@ -2,6 +2,7 @@ package com.memecorps.memedex.restcontroller;
 
 import com.memecorps.memedex.model.MemePost;
 import com.memecorps.memedex.repository.MemePostRepository;
+import com.memecorps.memedex.socketcontroller.MemeSocketController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,9 @@ public class MemePostController {
 
     @Autowired
     MemePostRepository memePostRepository;
+
+    @Autowired
+    MemeSocketController memeSocketController;
 
     @GetMapping({"/", ""})
     public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
@@ -62,6 +66,8 @@ public class MemePostController {
         if (memePostOptional.isEmpty()) {
             memePost.setId(null);
             memePost.setTimestamp(System.currentTimeMillis());
+
+            memeSocketController.sendNewMeme(memePost);
 
             return ResponseEntity.ok(memePostRepository.save(memePost));
         } else {
