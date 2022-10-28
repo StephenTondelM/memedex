@@ -11,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/memepost")
@@ -24,13 +22,19 @@ public class MemePostController {
     MemePostRepository memePostRepository;
 
     @GetMapping({"/", ""})
-    public ResponseEntity getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
         try {
             Pageable paging = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
 
             Page<MemePost> pageMemePosts = memePostRepository.findAll(paging);
 
-            return ResponseEntity.ok(pageMemePosts);
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", pageMemePosts.getContent());
+            response.put("number", pageMemePosts.getNumber());
+            response.put("totalElements", pageMemePosts.getTotalElements());
+            response.put("totalPages", pageMemePosts.getTotalPages());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
