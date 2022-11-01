@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -56,7 +57,7 @@ public class MemePostController {
     }
 
     @PostMapping({"/", ""})
-    public ResponseEntity createPost(@RequestBody MemePost memePost) {
+    public ResponseEntity createPost(@Valid @RequestBody MemePost memePost) {
         Optional<MemePost> memePostOptional = Optional.ofNullable(null);
 
         if (memePost.getId() != null) {
@@ -88,7 +89,7 @@ public class MemePostController {
     }
 
     @PutMapping({"/{id}"})
-    public ResponseEntity updateById(@PathVariable String id, @RequestBody MemePost memePost) {
+    public ResponseEntity updateById(@PathVariable String id, @Valid @RequestBody MemePost memePost) {
         var memePostOptional = memePostRepository.findById(id);
 
         if (memePostOptional.isPresent()) {
